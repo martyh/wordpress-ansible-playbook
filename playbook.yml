@@ -49,6 +49,9 @@
      role: importdb
      tags: [web, wordpress, import]
     -
+     role: iptables
+     tags: [iptables]     
+    -
      role: letsencrypt
      tags: [web, ssl]
     -
@@ -78,9 +81,6 @@
     -
      role: grunt-buildmachine
      tags: [buildmachine, gruntbm]
-    -
-     role: iptables
-     tags: [iptables]
     -
      role: postrun.message
      tags:
