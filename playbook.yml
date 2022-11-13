@@ -50,7 +50,7 @@
      tags: [web, wordpress, import]
     -
      role: iptables
-     tags: [iptables]     
+     tags: [init, iptables]     
     -
      role: letsencrypt
      tags: [web, ssl]

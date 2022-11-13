@@ -1,6 +1,5 @@
 ---
 - name: Generate random password for wp db user
-  become: yes
   command: php -r "echo md5(random_bytes(10));"
   register: db_pass
   when: >
@@ -10,7 +9,6 @@
     - "{{ domains }}"
 
 - name: Create WordPress database
-  become: yes
   mysql_db:
     name: '{{ item.wp.db_name }}'
     state: present
@@ -21,7 +19,6 @@
     - "{{ domains }}"
 
 - name: Create WordPress database user
-  become: yes
   mysql_user:
     name: '{{ item.0.wp.db_name }}'
     password: '{{ item.1.stdout }}'
@@ -37,7 +34,6 @@
 
 - block:
   - name: Creates directory for domain web files
-    become: yes
     file:
       path: '/home/{{ remote_web_user }}/www/{{ item.name }}'
       state: directory
@@ -48,7 +44,6 @@
       - "{{ domains }}"
 
   - name: Create logs directory
-    become: yes
     file:
       path: '/home/{{ remote_web_user }}/www/{{ item.name }}/logs'
       state: directory
@@ -60,7 +55,6 @@
 
   # installing WordPress via wp-cli
   - name: Is WordPress already downloaded
-    become: yes
     stat: path=/home/{{ remote_web_user }}/www/{{ item.name }}/wp-load.php
     register: wp_downloaded
     when: >
@@ -70,8 +64,6 @@
       - "{{ domains }}"
 
   - name: Download WordPress to domain directory via wp-cli
-    become: yes
-    become_user: "{{ remote_web_user }}"
     command: wp core download
     args:
       chdir: '/home/{{ remote_web_user }}/www/{{ item.0.name }}'
@@ -83,8 +75,6 @@
       - "{{ wp_downloaded.results }}"
 
   - name: Is WordPress config already setup
-    become: yes
-    become_user: "{{ remote_web_user }}"
     stat: path=/home/{{ remote_web_user }}/www/{{ item.name }}/wp-config.php
     register: wp_configured
     when: >
@@ -94,8 +84,6 @@
       - "{{ domains }}"
 
   - name: Setup WordPress Config using wp-cli
-    become: yes  
-    become_user: "{{ remote_web_user }}"
     command: wp config create --dbname={{ item.0.wp.db_name|quote }} --dbuser={{ item.0.wp.db_name|quote }} --dbpass={{item.2.stdout|quote}}
     args:
       chdir: '/home/{{ remote_web_user }}/www/{{ item.0.name }}'
@@ -108,7 +96,6 @@
       - "{{ db_pass.results }}"
 
   - name: Is WordPress already installed
-    become: yes  
     command: wp core is-installed
     args:
       chdir: '/home/{{ remote_web_user }}/www/{{ item.name }}'
@@ -121,8 +108,6 @@
      - "{{ domains }}"
 
   - name: Install WordPress using wp-cli
-    become: yes
-    become_user: "{{ remote_web_user }}"
     command: wp core install --url={{ item.0.name|quote }} --title={{ item.0.wp.site_title|quote }} --admin_user={{ item.0.wp.admin_user|quote }} --admin_password={{ item.0.wp.admin_pass|quote }} --admin_email={{ item.0.wp.admin_email|quote }}
     args:
       chdir: '/home/{{ remote_web_user }}/www/{{ item.0.name }}'
@@ -136,8 +121,6 @@
      - "{{ wp_installed.results }}"
 
   - name: Install WordPress Multisite using wp-cli
-    become: yes
-    become_user: "{{ remote_web_user }}"
     command: wp core multisite-install --url={{ item.0.name|quote }} --title={{ item.0.wp.site_title|quote }} {{ (item.0.wp.network_type is defined and item.0.wp.network_type == 'subdomain') | ternary('--subdomains', '') }} --admin_user={{ item.0.wp.admin_user|quote }} --admin_password={{ item.0.wp.admin_pass|quote }} --admin_email={{ item.0.wp.admin_email|quote }}
     args:
       chdir: '/home/{{ remote_web_user }}/www/{{ item.0.name }}'
@@ -152,3 +135,5 @@
      - "{{ wp_installed.results }}"
 
 
+  become: true
+  become_user: "{{ remote_web_user }}"
