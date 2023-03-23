@@ -1,5 +1,7 @@
 # WordPress Ansible Playbook 
 
+Do not use for wordpress.teams-work.co.uk.
+
 This repository contains an ansible playbook for provisioning a WordPress based server with both a production and staging website, optional ssl certificates (provided free via letsencrypt), PHP 7.3, Mariadb, wp-cli, and nginx.
 
 > Note: currently this is oriented towards a Ubuntu or Debian based box.
